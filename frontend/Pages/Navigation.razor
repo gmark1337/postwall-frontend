@@ -1,0 +1,80 @@
+﻿
+@using frontend.Shared;
+@page "/"
+
+@inject HttpClient httpClient
+@inject ILogger<Navigation> Logger
+
+<PageTitle>Home</PageTitle>
+
+<div class="col">
+<Badge Color="BadgeColor.Primary" IndicatorType="BadgeIndicatorType.RoundedPill">Home Page</Badge>
+</div>
+
+
+
+@if (Flyers == null)
+{
+	<p>Loading...</p>
+	<Spinner Type="SpinnerType.Grow" />
+
+}
+else
+{
+	@foreach(var supermarketGroup in Flyers.Where(f => f.PageIndex == 1).GroupBy(x => x.SupermarketID))
+	{
+		@switch (supermarketGroup.Key)
+		{
+			case "1":
+				<a href="https://www.lidl.hu" class="supermarket_hyperlink" title="Visit Lidl's official site">
+				<img src="images/Lidl_logo.png" alt="lidl_logo.png" class="supermarket_logo"/>
+				</a>
+				break;
+			case "2":
+				<a href="https://www.spar.hu" class="supermarket_hyperlink" title="Visit Spar's official site">
+				<img src="images/spar_logo.svg" alt="spar_logo.png" class="supermarket_logo"/>
+				</a>
+				break;
+		}
+
+			<div class="row">
+				@foreach (FlyerModel flyer in supermarketGroup)
+				{
+					<div class=" col-md-3 mb-4">
+						<CardGroup>
+							<Card Class="mb-4" Style="width:12rem;">
+								<img src="@flyer.ImageURL" alt="placeholder" class="card-img-top" />
+								<CardBody>
+									<CardText>@flyer.ActualDate</CardText>
+								</CardBody>
+							</Card>
+						</CardGroup>
+					</div>
+				}
+
+			</div>
+	}
+	
+}
+@code {
+
+	List<FlyerModel> Flyers;
+
+	protected override async Task OnInitializedAsync()
+	{
+
+		var supermakertIds = new[] { 1, 2, }; //TODO LATER
+
+		var flyerTasks = supermakertIds.Select(x => 
+			httpClient
+			.GetFromJsonAsync<List<FlyerModel>>
+			($"https://localhost:5001/api/flyers/supermarketId?supermarketId={x}"))
+			.ToList();
+		var res = await Task.WhenAll(flyerTasks);
+
+		Flyers = res.SelectMany(list => list).ToList();
+
+
+	}
+
+}

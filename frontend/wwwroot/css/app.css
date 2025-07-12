@@ -112,3 +112,14 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.supermarket_logo{
+    width: 4em;
+    height:4em;
+    margin:10px 0 10px 0;
+}
+
+
+a:hover img {
+    transform: scale(1.1);
+}
