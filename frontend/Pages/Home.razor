@@ -1,0 +1,50 @@
+﻿@page "/"
+@page "/home"
+
+<PageTitle>Supermarket_Flyers</PageTitle>
+
+<div class="text-center mt-5">
+
+
+    <h1 class="display-4 fw-bold">Welcome to Supermarket Flyers!</h1>
+    <p class="lead text-muted">
+        Browse weekly deals from your favorite supermarkets all in one place.
+    </p>
+
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <a href="/navigation" class="btn btn-primary btn-lg">
+            View Latest Flyers <i class="bi bi-arrow-right-circle ms-2"></i>
+        </a>
+        <a href="https://www.lidl.hu" class="btn btn-outline-dark btn-lg" target="_blank">
+            Visit Lidl <i class="bi bi-box-arrow-up-right ms-2"></i>
+        </a>
+        <a href="https://www.spar.hu" class="btn btn-outline-danger btn-lg" target="_blank">
+            Visit Spar <i class="bi bi-box-arrow-up-right ms-2"></i>
+        </a>
+    </div>
+    <p class="d-flex justify-content-center gap-1 mt-4 w-10">
+        <a class="btn btn-outline-secondary btn-lg" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+        Creator
+        </a>
+    </p>
+    <div class="collapse" id="collapseExample">
+        <div class="card card-body text-start mt-3">
+            <p>Welcome! I'm the developer behind <strong>Supermarket_flyers</strong>.</p>
+            <p>This project was built to make flyer browsing easier and more accessible.</p>
+            <p>If you have any trouble or something odd is happenning, feel free to reachout.</p>
+            <p>Thank you for visiting!</p>
+            <div>
+                <p><Icon Name="IconName.Envelope" />
+                    gadosmark7@gmail.com
+                </p>
+                <p>If you enjoy my work, please give a star on my  <Icon Name="IconName.Github" /><a href="https://github.com/gmark1337">Github</a> folder! :)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    
+}
