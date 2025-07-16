@@ -1,4 +1,6 @@
-﻿namespace frontend.Config
+﻿using System.Text.RegularExpressions;
+
+namespace frontend.Config
 {
     public enum SupermarketName
     {

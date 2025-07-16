@@ -7,13 +7,20 @@
 @inject IToastService _toastService
 
 <PageTitle>Home</PageTitle>
-<div class="col">
-	<Badge Color="BadgeColor.Primary" IndicatorType="BadgeIndicatorType.RoundedPill">Home Page</Badge>
-</div>
 
-<Button @ref="saveButton" Color="ButtonColor.Primary" Size="ButtonSize.ExtraLarge" @onclick="() => OnSaveClick((int)SupermarketName.Lidl)">
-	<Icon Name="IconName.ArrowClockwise"></Icon>
-</Button>
+<div class="position-relative">
+	<Card class="position-absolute top-0 end-0">
+		<CardHeader>
+			Information
+		</CardHeader>
+		<CardBody>
+		<CardText>If you want to see the weekly deals hit the reload button!</CardText>
+			<Button class="col-3 mx-auto mt-2"@ref="saveButton" Color="ButtonColor.Primary" Size="ButtonSize.ExtraLarge" @onclick="() => OnSaveClick((int)SupermarketName.Lidl)">
+			<Icon Name="IconName.ArrowClockwise"></Icon>
+		</Button>
+		</CardBody>
+	</Card>
+</div>
 
 
 @if (Flyers == null)
@@ -26,8 +33,12 @@
 }
 else
 {
+	<div>
+		<h1>Check out our special offer flyers!</h1>
+	</div>
 	@foreach(var supermarketGroup in Flyers.Where(f => f.PageIndex == 1).GroupBy(x => x.SupermarketID))
 	{
+		
 		@switch (supermarketGroup.Key)
 		{
 			case "1":
@@ -42,10 +53,12 @@ else
 				break;
 		}
 		<div class="flyer_wrapper">
+			
 			<div class="row">
+				
 				@foreach (FlyerModel flyer in supermarketGroup)
 				{
-					<div class=" col-md-2 mb-4">
+					<div class=" col-md-3 mb-4">
 						<CardGroup>
 							<Card Class="mb-4" Style="width:12rem;">
 								<img src="@flyer.ImageURL" alt="placeholder" class="card-img-top" />
@@ -56,12 +69,13 @@ else
 						</CardGroup>
 					</div>
 				}
-
+				
 			</div>
+			
 		</div>
 	}
-
 }
+
 @code {
 
 
@@ -85,6 +99,7 @@ else
 
 			Flyers = res.Where(r => r != null)
 						.SelectMany(list => list!)
+						.OrderByDescending(x => DateHelper.ExtractDateFromFlyer(x))
 						.ToList();
 		} catch(Exception ex)
 		{
@@ -100,34 +115,48 @@ else
 		saveButton.ShowLoading("Loading...");
 		try
 		{
-			var response = await _httpClient.GetAsync($"https://localhost:5001/api/flyers/supermarketId?supermarketId={supermarketId}");
-			if (response.IsSuccessStatusCode)
+			var postresponse = await _httpClient.PostAsync($"https://localhost:5001/api/flyers/import?supermarketId={supermarketId}", null);
+			if (postresponse is {StatusCode: System.Net.HttpStatusCode.OK})
 			{
-				var flyerData = await response.Content.ReadFromJsonAsync<List<FlyerModel>>();
-				if (flyerData != null)
+				var response = await _httpClient.GetAsync($"https://localhost:5001/api/flyers/supermarketId?supermarketId={supermarketId}");
+				if (response.IsSuccessStatusCode)
 				{
-					Flyers = flyerData.ToList();
-					_toastService.ShowSuccess("Flyer images fetched successfully!");
+					var flyerData = await response.Content.ReadFromJsonAsync<List<FlyerModel>>();
+					if (flyerData != null)
+					{
+						Flyers = flyerData.OrderByDescending(x => DateHelper.ExtractDateFromFlyer(x)).ToList();
+						_toastService.ShowSuccess("Flyer images fetched successfully!");
+					}
+					else
+					{
+						_toastService.ShowError("Something went wrong! Contach the creator for help!");
+					}
+
 				}
 				else
 				{
-					_toastService.ShowError("Something went wrong! Contach the creator for help!");
+					_toastService.ShowError("Server error! Try again later.");
 				}
-
+			} else if (postresponse is {StatusCode: System.Net.HttpStatusCode.Conflict })
+			{
+				_toastService.ShowInfo("The flyer is already up to date");
 			}
 			else
 			{
-				_toastService.ShowError("Server error! Try again later.");
+				_toastService.ShowError("Server error! Is the server running?");
 			}
+
+			
+			
 		}catch(Exception ex)
 		{
 			_toastService.ShowError($"Check your internet connection or contact the developer! \n {ex.Message}");
 		}
-			saveButton.HideLoading();
-			StateHasChanged();
+		saveButton.HideLoading();
+		StateHasChanged();
 
 	}
-
+	
 
 }
 
