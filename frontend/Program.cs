@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using frontend;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -16,6 +17,6 @@ builder.Logging.SetMinimumLevel(LogLevel.Debug);//
 
 builder.Services.AddBlazorBootstrap();
 
-
+builder.Services.AddBlazoredToast();
 
 await builder.Build().RunAsync();

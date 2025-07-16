@@ -3,8 +3,8 @@
 @using frontend.Config;
 @page "/navigation"
 
-@inject HttpClient httpClient
-
+@inject HttpClient _httpClient
+@inject IToastService _toastService
 
 <PageTitle>Home</PageTitle>
 <div class="col">
@@ -15,7 +15,6 @@
 	<Icon Name="IconName.ArrowClockwise"></Icon>
 </Button>
 
-<Toasts Class="p-3" Placement="ToastsPlacement.BottomRight" AutoHide="true" Delay="3000" />
 
 @if (Flyers == null)
 {
@@ -70,7 +69,6 @@ else
 
 	private Button saveButton = default!;
 
-	[Inject] protected ToastService ToastService { get; set; } = default!;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -81,7 +79,7 @@ else
 			//Returns the enums data
 			List<SupermarketName> id = Enum.GetValues(typeof(SupermarketName)).Cast<SupermarketName>().ToList();
 
-			var flyerTask = id.Select(x => httpClient.GetFromJsonAsync<List<FlyerModel>>($"https://localhost:5001/api/flyers/supermarketId?supermarketId={(int)x}")).ToList();
+			var flyerTask = id.Select(x => _httpClient.GetFromJsonAsync<List<FlyerModel>>($"https://localhost:5001/api/flyers/supermarketId?supermarketId={(int)x}")).ToList();
 
 			var res = await Task.WhenAll(flyerTask);
 
@@ -90,15 +88,11 @@ else
 						.ToList();
 		} catch(Exception ex)
 		{
-			ToastService.Notify(new(ToastType.Danger, "Sudden error occured while loading pages!")
-			{
-				HelpText = $"Is the API running? Error : {ex.Message}",
-				IconName = IconName.ExclamationTriangleFill
-			});
+			_toastService.ShowError($"Sudden error occured while loading pages! \n {ex.Message}");
 		}
 
 
-			
+
 	}
 
 	private async Task OnSaveClick(int supermarketId)
@@ -106,41 +100,28 @@ else
 		saveButton.ShowLoading("Loading...");
 		try
 		{
-			var response = await httpClient.GetAsync($"https://localhost:5001/api/flyers/supermarketId?supermarketId={supermarketId}");
+			var response = await _httpClient.GetAsync($"https://localhost:5001/api/flyers/supermarketId?supermarketId={supermarketId}");
 			if (response.IsSuccessStatusCode)
 			{
 				var flyerData = await response.Content.ReadFromJsonAsync<List<FlyerModel>>();
 				if (flyerData != null)
 				{
 					Flyers = flyerData.ToList();
-					ToastService.Notify(new(ToastType.Success, $"Flyer images fetched successfully. "));
+					_toastService.ShowSuccess("Flyer images fetched successfully!");
 				}
 				else
 				{
-
-					ToastService.Notify(new(ToastType.Warning, "Something went wrong!")
-					{
-						HelpText = "Contact the creator for help.",
-						IconName = IconName.ExclamationTriangleFill
-					});
+					_toastService.ShowError("Something went wrong! Contach the creator for help!");
 				}
 
 			}
 			else
 			{
-				ToastService.Notify(new(ToastType.Danger, "Server returned an error.")
-				{
-					HelpText = "Try again later.",
-					IconName = IconName.ExclamationTriangleFill
-				});
+				_toastService.ShowError("Server error! Try again later.");
 			}
 		}catch(Exception ex)
 		{
-			ToastService.Notify(new(ToastType.Danger, $"Error: {ex.Message}")
-			{
-				HelpText = "Check your internet connection or contact the developer.",
-				IconName = IconName.ExclamationTriangleFill
-			});
+			_toastService.ShowError($"Check your internet connection or contact the developer! \n {ex.Message}");
 		}
 			saveButton.HideLoading();
 			StateHasChanged();
