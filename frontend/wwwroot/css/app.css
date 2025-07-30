@@ -124,4 +124,83 @@ a:hover img {
     transform: scale(1.1);
 }
 
+.magazine-viewer{
+    height: 80vh;
+    max-width:100%;
+    overflow:visible;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+    overflow: visible;
+}
+
+.zoom-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    background-color: rgba(255,255,255,0.8);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+    color: #333;
+}
+
+.flyer-image {
+    max-width: 45vw;
+    max-height: 80vh;
+    object-fit: contain;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.flyer-image.big {
+     max-width: 48vw;
+     max-height: 90vh;
+}
+
+.image-container button.position-absolute {
+    z-index: 10;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255,255,255,0.8);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+    color: #333;
+}
+
+.arrow-btn{
+    background: rgba(255,255,255,0.8);
+    border: none;
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
+    cursor:pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index:10;
+}
+
+.left-arrow{
+    left: 1rem;
+}
+.right-arrow{
+    right: 1rem; 
+}
+
+.arrow-btn:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.zoom-btn {
+    border: 2px solid red;
+    background-color: yellow;
+}
+
 

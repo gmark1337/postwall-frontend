@@ -9,18 +9,19 @@
 <PageTitle>Home</PageTitle>
 
 <div class="position-relative">
-	<Card class="position-absolute top-0 end-0">
+	<Card class="position-absolute top-0" Style="right: -250px;">
 		<CardHeader>
 			Information
 		</CardHeader>
 		<CardBody>
 		<CardText>If you want to see the weekly deals hit the reload button!</CardText>
-			<Button class="col-3 mx-auto mt-2"@ref="saveButton" Color="ButtonColor.Primary" Size="ButtonSize.ExtraLarge" @onclick="() => OnSaveClick((int)SupermarketName.Lidl)">
+			<Button class="col-3 mx-auto mt-2"@ref="saveButton" Color="ButtonColor.Primary" Size="ButtonSize.ExtraLarge" @onclick="OnSaveClick">
 			<Icon Name="IconName.ArrowClockwise"></Icon>
 		</Button>
 		</CardBody>
 	</Card>
 </div>
+
 
 
 @if (Flyers == null)
@@ -42,12 +43,12 @@ else
 		@switch (supermarketGroup.Key)
 		{
 			case "1":
-				<a href="https://www.lidl.hu" class="supermarket_hyperlink" title="Visit Lidl's official site">
+				<a href="https://www.lidl.hu" class="supermarket_hyperlink" id="lidl-section" title="Visit Lidl's official site">
 					<img src="images/Lidl_logo.png" alt="lidl_logo.png" class="supermarket_logo"/>
 				</a>
 				break;
 			case "2":
-				<a href="https://www.spar.hu" class="supermarket_hyperlink" title="Visit Spar's official site">
+				<a href="https://www.spar.hu" class="supermarket_hyperlink" id ="spar-section" title="Visit Spar's official site">
 					<img src="images/spar_logo.svg" alt="spar_logo.png" class="supermarket_logo"/>
 				</a>
 				break;
@@ -61,7 +62,7 @@ else
 					<div class=" col-md-3 mb-4">
 						<CardGroup>
 							<Card Class="mb-4" Style="width:12rem;">
-								<img src="@flyer.ImageURL" alt="placeholder" class="card-img-top" />
+								<a href="/flyer/@flyer.ActualDate"><img src="@flyer.ImageURL" alt="placeholder" class="card-img-top" /></a>
 								<CardBody>
 									<CardText>@flyer.ActualDate</CardText>
 								</CardBody>
@@ -74,12 +75,45 @@ else
 			
 		</div>
 	}
+	@foreach(var supermarketGroup in FlyerPdfs.Where(x => x.SupermarketId != null).GroupBy(x => x.SupermarketId))
+	{
+		@switch (supermarketGroup.Key)
+		{
+			case "3":
+				<a href="https://www.penny.hu" class="supermarket_hyperlink" id="penny-section" title="Visit Penny's official site">
+					<img src="images/Penny-Logo.svg.png" alt="Penny-logo.svg" class="supermarket_logo" />
+				</a>
+				break;
+		}
+		<div class="flyer_wrapper">
+			<div class="row">
+				@foreach(FlyerPdfModel flyer in supermarketGroup)
+				{
+					<div class=" col-md-3 mb-4">
+						<CardGroup>
+							<Card Class="mb-4" Style="width:12rem;">
+								<a href="@flyer.FlyerPdfURL" class="supermarket_hpyerlink">
+									<img src="@flyer.FirstPageURL" alt="This supermarket's first page" />
+								</a>
+								<CardBody>
+									<CardText>@flyer.ActualDate</CardText>
+								</CardBody>
+							</Card>
+						</CardGroup>
+					</div>
+				}
+			</div>
+		</div>
+	}
 }
 
 @code {
 
 
 	List<FlyerModel> Flyers;
+
+
+	List<FlyerPdfModel> FlyerPdfs;
 
 	private Button saveButton = default!;
 
@@ -101,6 +135,10 @@ else
 						.SelectMany(list => list!)
 						.OrderByDescending(x => DateHelper.ExtractDateFromFlyer(x))
 						.ToList();
+
+			var flyerPdfTask = await _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"https://localhost:5001/api/pdfFlyer/supermarketId?supermarketId=3");
+
+			FlyerPdfs = flyerPdfTask.ToList();
 		} catch(Exception ex)
 		{
 			_toastService.ShowError($"Sudden error occured while loading pages! \n {ex.Message}");
@@ -110,44 +148,53 @@ else
 
 	}
 
-	private async Task OnSaveClick(int supermarketId)
+	private async Task OnSaveClick()
 	{
 		saveButton.ShowLoading("Loading...");
 		try
 		{
-			var postresponse = await _httpClient.PostAsync($"https://localhost:5001/api/flyers/import?supermarketId={supermarketId}", null);
-			if (postresponse is {StatusCode: System.Net.HttpStatusCode.OK})
-			{
-				var response = await _httpClient.GetAsync($"https://localhost:5001/api/flyers/supermarketId?supermarketId={supermarketId}");
-				if (response.IsSuccessStatusCode)
-				{
-					var flyerData = await response.Content.ReadFromJsonAsync<List<FlyerModel>>();
-					if (flyerData != null)
-					{
-						Flyers = flyerData.OrderByDescending(x => DateHelper.ExtractDateFromFlyer(x)).ToList();
-						_toastService.ShowSuccess("Flyer images fetched successfully!");
-					}
-					else
-					{
-						_toastService.ShowError("Something went wrong! Contach the creator for help!");
-					}
+			List<SupermarketName> ids = Enum.GetValues(typeof(SupermarketName)).Cast<SupermarketName>().ToList();
+			var postTask = ids.Select(async supermarket =>
+	{
+	try
+	{
+		var response = await _httpClient.PostAsync($"https://localhost:5001/api/flyers/import?supermarketId={(int)supermarket}", null);
 
-				}
-				else
-				{
-					_toastService.ShowError("Server error! Try again later.");
-				}
-			} else if (postresponse is {StatusCode: System.Net.HttpStatusCode.Conflict })
-			{
-				_toastService.ShowInfo("The flyer is already up to date");
-			}
-			else
-			{
-				_toastService.ShowError("Server error! Is the server running?");
-			}
+		if (response is { StatusCode: System.Net.HttpStatusCode.Conflict })
+		{
+			_toastService.ShowInfo($"Flyer for {supermarket} is already up to date!");
+		}
+		else if (!response.IsSuccessStatusCode)
+		{
+			_toastService.ShowWarning($"Failed to update flyer for {supermarket}. Status: {response.StatusCode}");
+		}
+	}
+	catch (Exception ex)
+	{
+		_toastService.ShowError($"Error updating flyer for {supermarket}: {ex.Message}");
+	}
+	});
+			await Task.WhenAll(postTask);
 
-			
-			
+			var getTask = ids.Select(async x =>
+			{
+				try
+				{
+					return await _httpClient.GetFromJsonAsync<List<FlyerModel>>($"https://localhost:5001/api/flyers/supermarketId?supermarketId={(int)x}");
+				}
+				catch
+				{
+					return null;
+				}
+			}).ToList();
+
+			var responses = await Task.WhenAll(getTask);
+
+			Flyers = responses.Where(r => r != null)
+			.SelectMany(list => list!)
+			.OrderByDescending(x => DateHelper.ExtractDateFromFlyer(x))
+			.ToList();
+
 		}catch(Exception ex)
 		{
 			_toastService.ShowError($"Check your internet connection or contact the developer! \n {ex.Message}");

@@ -1,0 +1,113 @@
+﻿@page "/flyer/{week}"
+@using frontend.Shared
+@inject HttpClient _httpClient
+
+<div class="magazine-viewer d-flex justify-content-center align-items-center position-relative" tabindex="0" @onkeydown="HandleArrowKeyDown">
+@if (Flyer == null)
+{
+	<div class="text-center mt-4">
+		<Spinner Color="SpinnerColor.Primary" Size="SpinnerSize.Large" />
+		<p>Loading flyers...</p>
+	</div>
+}
+else
+{
+		
+	<Button class="arrow-btn left-arrow" @onclick="PrevPage" Disabled="@(_currentIndex == 0)">
+		<i class="bi bi-chevron-left"></i>
+	</Button>
+
+		<div class="d-flex">
+			<div class="image-container position-relative">
+				<picture>
+					<source type="image/webp" />
+			<img src="@Flyer[_currentIndex].ImageURL" alt="Flyer Page" class="flyer-image @(isBig ? "big" : "")" loading="lazy" decoding="async" fetchpriority="high"/>
+				</picture>
+			</div>
+			@if(_currentIndex + 1 < Flyer.Count)
+			{
+				<div class="image-container position-relative">
+					<picture>
+						<source
+							tpye="image/webp"/>
+						<img src="@Flyer[_currentIndex + 1].ImageURL" alt="Flyer Page" class="flyer-image @(isBig ? "big" : "")" loading="lazy" decoding="async" fetchpriority="high" />
+					</picture>
+				</div>
+			}
+
+			<Button class="position-absolute zoom-btn border border-dark" @onclick="ToggleSize">
+				@if (isBig)
+				{
+					<i class="bi bi-arrows-angle-contract"></i>
+				}
+				else
+				{
+					<i class="bi bi-arrows-angle-expand"></i>
+				}
+			</Button>
+			
+		</div>	
+
+	<Button Class="arrow-btn right-arrow" @onclick="NextPage" Disabled="@(_currentIndex == Flyer.Count - 1)">
+		<i class="bi bi-chevron-right"></i>
+	</Button>
+
+}
+</div>
+
+
+@code {
+	[Parameter] public string week{ get; set; }
+	List<FlyerModel> Flyer;
+
+	private int _currentIndex = 0;
+	private bool isBig = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var response = await _httpClient.GetAsync($"https://localhost:5001/api/flyers/ActualDate?actualDate={week}");
+		if(response != null)
+		{
+			var flyerdata = await response.Content.ReadFromJsonAsync<List<FlyerModel>>();
+			Flyer = flyerdata.ToList();
+		}
+		else
+		{
+
+		}
+	}
+	private void PrevPage()
+	{
+		if(_currentIndex - 2  >= 0)
+		{
+			_currentIndex -= 2;
+		}
+	}
+
+	private void NextPage()
+	{
+		if(_currentIndex + 2 < Flyer.Count)
+		{
+			_currentIndex += 2;
+		}
+	}
+
+	private void HandleArrowKeyDown(KeyboardEventArgs e)
+	{
+		switch (e.Key)
+		{
+			case "ArrowLeft":
+				PrevPage();
+				break;
+			case "ArrowRight":
+				NextPage();
+				break;
+		}
+	}
+
+	private void ToggleSize()
+	{
+		isBig = !isBig;
+	}
+
+}
