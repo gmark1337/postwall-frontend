@@ -53,11 +53,20 @@ else
 				</a>
 				break;
 		}
+
+		int limit = supermarketGroup.Key switch
+		{
+			"1" => 2,
+			"2" => 1,
+			_ => 2
+		};
+
+
 		<div class="flyer_wrapper">
 			
 			<div class="row">
 				
-				@foreach (FlyerModel flyer in supermarketGroup)
+				@foreach (FlyerModel flyer in supermarketGroup.Take(limit))
 				{
 					<div class=" col-md-3 mb-4">
 						<CardGroup>
@@ -75,8 +84,9 @@ else
 			
 		</div>
 	}
-	@foreach(var supermarketGroup in FlyerPdfs.Where(x => x.SupermarketId != null).GroupBy(x => x.SupermarketId))
+	@foreach(var supermarketGroup in FlyerPdfs.Where(x => x.SupermarketID != null).GroupBy(x => x.SupermarketID))
 	{
+		<h1>Click the image to view in PDF file format</h1>
 		@switch (supermarketGroup.Key)
 		{
 			case "3":
@@ -85,6 +95,7 @@ else
 				</a>
 				break;
 		}
+		
 		<div class="flyer_wrapper">
 			<div class="row">
 				@foreach(FlyerPdfModel flyer in supermarketGroup)
@@ -104,6 +115,7 @@ else
 				}
 			</div>
 		</div>
+		
 	}
 }
 
@@ -122,7 +134,6 @@ else
 	{
 		try
 		{
-			int supermarketCount = Enum.GetValues(typeof(SupermarketName)).Length;
 
 			//Returns the enums data
 			List<SupermarketName> id = Enum.GetValues(typeof(SupermarketName)).Cast<SupermarketName>().ToList();
@@ -136,9 +147,15 @@ else
 						.OrderByDescending(x => DateHelper.ExtractDateFromFlyer(x))
 						.ToList();
 
-			var flyerPdfTask = await _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"https://localhost:5001/api/pdfFlyer/supermarketId?supermarketId=3");
+			List<SupermarketPdfName> pdfID = Enum.GetValues(typeof(SupermarketPdfName)).Cast<SupermarketPdfName>().ToList();
 
-			FlyerPdfs = flyerPdfTask.ToList();
+			var flyerPdfTask = pdfID.Select(x => _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"https://localhost:5001/api/pdfFlyer/supermarketId?supermarketId={(int)x}")).ToList();
+
+			var pdfRes = await Task.WhenAll(flyerPdfTask);
+
+			FlyerPdfs = pdfRes.Where(r => r != null)
+									.SelectMany(list => list!)
+									.ToList();
 		} catch(Exception ex)
 		{
 			_toastService.ShowError($"Sudden error occured while loading pages! \n {ex.Message}");
@@ -155,25 +172,21 @@ else
 		{
 			List<SupermarketName> ids = Enum.GetValues(typeof(SupermarketName)).Cast<SupermarketName>().ToList();
 			var postTask = ids.Select(async supermarket =>
-	{
-	try
-	{
-		var response = await _httpClient.PostAsync($"https://localhost:5001/api/flyers/import?supermarketId={(int)supermarket}", null);
+			{
+				try
+				{
+					var response = await _httpClient.PostAsync($"https://localhost:5001/api/flyers/import?supermarketId={(int)supermarket}", null);
 
-		if (response is { StatusCode: System.Net.HttpStatusCode.Conflict })
-		{
-			_toastService.ShowInfo($"Flyer for {supermarket} is already up to date!");
-		}
-		else if (!response.IsSuccessStatusCode)
-		{
-			_toastService.ShowWarning($"Failed to update flyer for {supermarket}. Status: {response.StatusCode}");
-		}
-	}
-	catch (Exception ex)
-	{
-		_toastService.ShowError($"Error updating flyer for {supermarket}: {ex.Message}");
-	}
-	});
+					if (response is { StatusCode: System.Net.HttpStatusCode.Conflict }){
+						_toastService.ShowInfo($"Flyer for {supermarket} is already up to date!");
+					}else if (!response.IsSuccessStatusCode){
+						_toastService.ShowWarning($"Failed to update flyer for {supermarket}. Status: {response.StatusCode}");
+					}
+				}catch (Exception ex)
+				{
+					_toastService.ShowError($"Error updating flyer for {supermarket}: {ex.Message}");
+				}
+			});
 			await Task.WhenAll(postTask);
 
 			var getTask = ids.Select(async x =>
@@ -181,8 +194,7 @@ else
 				try
 				{
 					return await _httpClient.GetFromJsonAsync<List<FlyerModel>>($"https://localhost:5001/api/flyers/supermarketId?supermarketId={(int)x}");
-				}
-				catch
+				}catch
 				{
 					return null;
 				}
@@ -195,6 +207,42 @@ else
 			.OrderByDescending(x => DateHelper.ExtractDateFromFlyer(x))
 			.ToList();
 
+			//PDF BLOCK 
+			List<SupermarketPdfName> pdfID = Enum.GetValues(typeof(SupermarketPdfName)).Cast<SupermarketPdfName>().ToList();
+			var pdfPostTask = pdfID.Select(async supermarket =>
+			{
+				try
+				{
+					var response = await _httpClient.PostAsync($"https://localhost:5001/api/pdfFlyer/import?supermarketId={(int)supermarket}", null);
+					if (response is { StatusCode: System.Net.HttpStatusCode.Conflict })
+						_toastService.ShowInfo($"Flyer for {supermarket} is already up to date!");
+					else if (!response.IsSuccessStatusCode)
+					{
+						_toastService.ShowWarning($"Failed to update flyer for {supermarket}. Status: {response.StatusCode}");
+					}
+				}
+				catch (Exception ex)
+				{
+					_toastService.ShowError($"Error updating flyer for {supermarket}: {ex.Message}");
+				}
+			});
+			await Task.WhenAll(pdfPostTask);
+
+			var getPdfTask = pdfID.Select(async x =>
+			{
+				try
+				{
+					return await _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"https://localhost:5001/api/pdfFlyer/supermarketId?supermarketId={(int)x}");
+				}
+				catch{
+					return null;
+				}
+			});
+			var pdfResponses = await Task.WhenAll(getPdfTask);
+
+			FlyerPdfs = pdfResponses.Where(r => r != null)
+			.SelectMany(list => list!)
+			.ToList();
 		}catch(Exception ex)
 		{
 			_toastService.ShowError($"Check your internet connection or contact the developer! \n {ex.Message}");

@@ -6,6 +6,7 @@ namespace frontend.Shared
     {
         public string flyerID { get; set; }
 
+
         public string SupermarketID { get; set; }
 
         [JsonPropertyName("pageIndex")]

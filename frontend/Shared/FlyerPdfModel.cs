@@ -4,9 +4,11 @@ namespace frontend.Shared
 {
     public class FlyerPdfModel
     {
-        public string FlyerPdfId { get; set; }
+        [JsonPropertyName("FlyerPdfId")]
+        public string FlyerPdfID { get; set; }
 
-        public string SupermarketId {  get; set; }
+        [JsonPropertyName("SupermarketId")]
+        public string SupermarketID {  get; set; }
 
         public string ActualDate { get; set; }
 
