@@ -5,16 +5,17 @@
 
 @inject HttpClient _httpClient
 @inject IToastService _toastService
+@inject IStringLocalizer<NavigationL> Localizer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>@Localizer["Home"]</PageTitle>
 
 <div class="position-relative">
 	<Card class="position-absolute top-0" Style="right: -250px;">
 		<CardHeader>
-			Information
+			@Localizer["Information"]
 		</CardHeader>
 		<CardBody>
-		<CardText>If you want to see the weekly deals hit the reload button!</CardText>
+		<CardText>@Localizer["InformationMessage"]</CardText>
 			<Button class="col-3 mx-auto mt-2"@ref="saveButton" Color="ButtonColor.Primary" Size="ButtonSize.ExtraLarge" @onclick="OnSaveClick">
 			<Icon Name="IconName.ArrowClockwise"></Icon>
 		</Button>
@@ -28,14 +29,14 @@
 {
 	<div class="text-center mt-4">
 		<Spinner Color="SpinnerColor.Primary" Size="SpinnerSize.Large" />
-		<p>Loading flyers...</p>
+		<p>@Localizer["Loading"]</p>
 	</div>
 
 }
 else
 {
 	<div>
-		<h1>Check out our special offer flyers!</h1>
+		<h1>@Localizer["AttractionMessage"]</h1>
 	</div>
 	@foreach(var supermarketGroup in Flyers.Where(f => f.PageIndex == 1).GroupBy(x => x.SupermarketID))
 	{
@@ -86,7 +87,7 @@ else
 	}
 	@foreach(var supermarketGroup in FlyerPdfs.Where(x => x.SupermarketID != null).GroupBy(x => x.SupermarketID))
 	{
-		<h1>Click the image to view in PDF file format</h1>
+		<h1>@Localizer["PennyMessage"]</h1>
 		@switch (supermarketGroup.Key)
 		{
 			case "3":
@@ -167,7 +168,7 @@ else
 
 	private async Task OnSaveClick()
 	{
-		saveButton.ShowLoading("Loading...");
+		saveButton.ShowLoading(Localizer["LoadingMessage"]);
 		try
 		{
 			List<SupermarketName> ids = Enum.GetValues(typeof(SupermarketName)).Cast<SupermarketName>().ToList();
@@ -178,13 +179,13 @@ else
 					var response = await _httpClient.PostAsync($"https://localhost:5001/api/flyers/import?supermarketId={(int)supermarket}", null);
 
 					if (response is { StatusCode: System.Net.HttpStatusCode.Conflict }){
-						_toastService.ShowInfo($"Flyer for {supermarket} is already up to date!");
+						_toastService.ShowInfo(Localizer["SupermarketIsUpToDateInfo", supermarket]);
 					}else if (!response.IsSuccessStatusCode){
-						_toastService.ShowWarning($"Failed to update flyer for {supermarket}. Status: {response.StatusCode}");
+						_toastService.ShowWarning(Localizer["SupermarketFailedToUpdateWarning", supermarket, response.StatusCode]);
 					}
 				}catch (Exception ex)
 				{
-					_toastService.ShowError($"Error updating flyer for {supermarket}: {ex.Message}");
+					_toastService.ShowError(Localizer["SupermarketErrorUpdatingMessage", supermarket, ex.Message]);
 				}
 			});
 			await Task.WhenAll(postTask);
@@ -215,15 +216,15 @@ else
 				{
 					var response = await _httpClient.PostAsync($"https://localhost:5001/api/pdfFlyer/import?supermarketId={(int)supermarket}", null);
 					if (response is { StatusCode: System.Net.HttpStatusCode.Conflict })
-						_toastService.ShowInfo($"Flyer for {supermarket} is already up to date!");
+						_toastService.ShowInfo(Localizer["SupermarketIsUpToDateInfo", supermarket]);
 					else if (!response.IsSuccessStatusCode)
 					{
-						_toastService.ShowWarning($"Failed to update flyer for {supermarket}. Status: {response.StatusCode}");
+						_toastService.ShowWarning(Localizer["SupermarketFailedToUpdateWarning", supermarket, response.StatusCode]);
 					}
 				}
 				catch (Exception ex)
 				{
-					_toastService.ShowError($"Error updating flyer for {supermarket}: {ex.Message}");
+					_toastService.ShowError(Localizer["SupermarketErrorUpdatingMessage", supermarket, ex.Message]);
 				}
 			});
 			await Task.WhenAll(pdfPostTask);
@@ -245,7 +246,7 @@ else
 			.ToList();
 		}catch(Exception ex)
 		{
-			_toastService.ShowError($"Check your internet connection or contact the developer! \n {ex.Message}");
+			_toastService.ShowError(Localizer["InternetConnectionErrorMessage", ex.Message]);
 		}
 		saveButton.HideLoading();
 		StateHasChanged();
