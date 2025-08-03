@@ -101,11 +101,11 @@ else
 			<div class="row">
 				@foreach(FlyerPdfModel flyer in supermarketGroup)
 				{
-					<div class=" col-md-3 mb-4">
+					<div class="col-md-3 mb-4">
 						<CardGroup>
-							<Card Class="mb-4" Style="width:12rem;">
+							<Card Class="mb-4" Style="width:14rem;">
 								<a href="@flyer.FlyerPdfURL" class="supermarket_hpyerlink">
-									<img src="@flyer.FirstPageURL" alt="This supermarket's first page" />
+									<img src="@flyer.FirstPageURL" alt="This supermarket's first page" class="card-img-top" />
 								</a>
 								<CardBody>
 									<CardText>@flyer.ActualDate</CardText>
