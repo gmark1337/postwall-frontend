@@ -14,6 +14,11 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddLocalization();
 
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("https://postwall-backend.azurewebsites.net/")
+});
+
 builder.Logging.SetMinimumLevel(LogLevel.Debug);//
 //builder.Logging.AddConsole();
 

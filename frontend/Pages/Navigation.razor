@@ -139,7 +139,7 @@ else
 			//Returns the enums data
 			List<SupermarketName> id = Enum.GetValues(typeof(SupermarketName)).Cast<SupermarketName>().ToList();
 
-			var flyerTask = id.Select(x => _httpClient.GetFromJsonAsync<List<FlyerModel>>($"https://localhost:5001/api/flyers/supermarketId?supermarketId={(int)x}")).ToList();
+			var flyerTask = id.Select(x => _httpClient.GetFromJsonAsync<List<FlyerModel>>($"api/flyers/supermarketId?supermarketId={(int)x}")).ToList();
 
 			var res = await Task.WhenAll(flyerTask);
 
@@ -150,7 +150,7 @@ else
 
 			List<SupermarketPdfName> pdfID = Enum.GetValues(typeof(SupermarketPdfName)).Cast<SupermarketPdfName>().ToList();
 
-			var flyerPdfTask = pdfID.Select(x => _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"https://localhost:5001/api/pdfFlyer/supermarketId?supermarketId={(int)x}")).ToList();
+			var flyerPdfTask = pdfID.Select(x => _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"api/pdfFlyer/supermarketId?supermarketId={(int)x}")).ToList();
 
 			var pdfRes = await Task.WhenAll(flyerPdfTask);
 
@@ -176,7 +176,7 @@ else
 			{
 				try
 				{
-					var response = await _httpClient.PostAsync($"https://localhost:5001/api/flyers/import?supermarketId={(int)supermarket}", null);
+					var response = await _httpClient.PostAsync($"api/flyers/import?supermarketId={(int)supermarket}", null);
 
 					if (response is { StatusCode: System.Net.HttpStatusCode.Conflict }){
 						_toastService.ShowInfo(Localizer["SupermarketIsUpToDateInfo", supermarket]);
@@ -194,7 +194,7 @@ else
 			{
 				try
 				{
-					return await _httpClient.GetFromJsonAsync<List<FlyerModel>>($"https://localhost:5001/api/flyers/supermarketId?supermarketId={(int)x}");
+					return await _httpClient.GetFromJsonAsync<List<FlyerModel>>($"api/flyers/supermarketId?supermarketId={(int)x}");
 				}catch
 				{
 					return null;
@@ -214,7 +214,7 @@ else
 			{
 				try
 				{
-					var response = await _httpClient.PostAsync($"https://localhost:5001/api/pdfFlyer/import?supermarketId={(int)supermarket}", null);
+					var response = await _httpClient.PostAsync($"api/pdfFlyer/import?supermarketId={(int)supermarket}", null);
 					if (response is { StatusCode: System.Net.HttpStatusCode.Conflict })
 						_toastService.ShowInfo(Localizer["SupermarketIsUpToDateInfo", supermarket]);
 					else if (!response.IsSuccessStatusCode)
@@ -233,7 +233,7 @@ else
 			{
 				try
 				{
-					return await _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"https://localhost:5001/api/pdfFlyer/supermarketId?supermarketId={(int)x}");
+					return await _httpClient.GetFromJsonAsync<List<FlyerPdfModel>>($"api/pdfFlyer/supermarketId?supermarketId={(int)x}");
 				}
 				catch{
 					return null;
