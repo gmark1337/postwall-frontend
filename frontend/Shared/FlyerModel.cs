@@ -4,9 +4,10 @@ namespace frontend.Shared
 {
     public class FlyerModel
     {
+        [JsonPropertyName("flyerID")]
         public string flyerID { get; set; }
 
-
+        [JsonPropertyName("supermarketID")]
         public string SupermarketID { get; set; }
 
         [JsonPropertyName("pageIndex")]
@@ -14,6 +15,8 @@ namespace frontend.Shared
 
         [JsonPropertyName("url")]
         public string ImageURL { get; set; }
+
+        [JsonPropertyName("actualDate")]
 
         public string ActualDate { get; set; }
     }
