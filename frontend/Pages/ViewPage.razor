@@ -65,7 +65,7 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		var response = await _httpClient.GetAsync($"https://localhost:5001/api/flyers/ActualDate?actualDate={week}");
+		var response = await _httpClient.GetAsync($"api/flyers/ActualDate?actualDate={week}");
 		if(response != null)
 		{
 			var flyerdata = await response.Content.ReadFromJsonAsync<List<FlyerModel>>();
