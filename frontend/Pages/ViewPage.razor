@@ -69,7 +69,9 @@ else
 		if(response != null)
 		{
 			var flyerdata = await response.Content.ReadFromJsonAsync<List<FlyerModel>>();
-			Flyer = flyerdata.ToList();
+			Flyer = flyerdata.Where(x => x != null)
+					.OrderBy(x => x.PageIndex)
+					.ToList();
 		}
 		else
 		{
@@ -78,6 +80,10 @@ else
 	}
 	private void PrevPage()
 	{
+		if(_currentIndex == 1 && Flyer.Count % 2 == 1)
+		{
+			_currentIndex -= 1;
+		}
 		if(_currentIndex - 2  >= 0)
 		{
 			_currentIndex -= 2;
@@ -86,6 +92,10 @@ else
 
 	private void NextPage()
 	{
+		if(_currentIndex == 0 && Flyer.Count % 2 == 1)
+		{
+			_currentIndex += 1;
+		}
 		if(_currentIndex + 2 < Flyer.Count)
 		{
 			_currentIndex += 2;
