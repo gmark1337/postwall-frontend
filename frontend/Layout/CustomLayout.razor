@@ -4,23 +4,25 @@
 @inject IStringLocalizer<CustomLayoutL> Localizer
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
     <a class="navbar-brand" href="/">Postwall</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
             <li class="nav-item active">
-                <a class="nav-link" href="/home">@Localizer["Home"]</a>
+                <!--<a class="nav-link" href="/home">@Localizer["Home"]</a>-->
+                <NavLink class="nav-link" href="/home">@Localizer["Home"]</NavLink>
 
             </li>
             <li class="nav-item active">
-                <a class="nav-link" href="/navigation">@Localizer["Flyers"]</a>
-
+                <!--<a class="nav-link" href="/navigation">@Localizer["Flyers"]</a>-->
+                <NavLink class="nav-link" href="/navigation">@Localizer["Flyers"]</NavLink>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                <a class="nav-link dropdown-toggle" href="javasciprt:void(0)" id="navbarDropdownMenuLink" role="button"
                    data-bs-toggle="dropdown" aria-expanded="false">
                     @Localizer["Supermarkets"]
                 </a>
@@ -34,7 +36,7 @@
                 </ul>
             </li>
         </ul>
-
+    </div>
     </div>
 </nav>
 <div class="container mt-4">

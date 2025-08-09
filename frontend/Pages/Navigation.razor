@@ -9,6 +9,7 @@
 
 <PageTitle>@Localizer["Home"]</PageTitle>
 
+<!--
 <div class="position-relative">
 	<Card class="position-absolute top-0" Style="right: -250px;">
 		<CardHeader>
@@ -21,7 +22,7 @@
 		</Button>
 		</CardBody>
 	</Card>
-</div>
+</div>-->
 
 
 
@@ -87,6 +88,11 @@ else
 	}
 	@foreach(var supermarketGroup in FlyerPdfs.Where(x => x.SupermarketID != null).GroupBy(x => x.SupermarketID))
 	{
+		int limit = supermarketGroup.Key switch
+		{
+			"3" => 3,
+			_ => 2
+		};
 		<h1>@Localizer["PennyMessage"]</h1>
 		@switch (supermarketGroup.Key)
 		{
@@ -99,7 +105,7 @@ else
 		
 		<div class="flyer_wrapper">
 			<div class="row">
-				@foreach(FlyerPdfModel flyer in supermarketGroup)
+				@foreach(FlyerPdfModel flyer in supermarketGroup.Take(limit))
 				{
 					<div class="col-md-3 mb-4">
 						<CardGroup>

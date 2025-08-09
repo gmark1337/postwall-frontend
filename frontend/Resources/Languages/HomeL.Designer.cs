@@ -70,7 +70,7 @@ namespace frontend.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome! I&apos;m the developer behind &lt;strong&gt;Postwall&lt;/strong&gt;..
+        ///   Looks up a localized string similar to Welcome! My name is Gados Márk and  I&apos;m the developer behind &lt;strong&gt;Postwall&lt;/strong&gt;..
         /// </summary>
         public static string CreatorMessageLine1 {
             get {

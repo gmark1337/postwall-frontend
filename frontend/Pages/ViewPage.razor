@@ -2,7 +2,7 @@
 @using frontend.Shared
 @inject HttpClient _httpClient
 
-<div class="magazine-viewer d-flex justify-content-center align-items-center position-relative" tabindex="0" @onkeydown="HandleArrowKeyDown">
+<div class="magazine-viewer justify-content-center align-items-center position-relative" tabindex="0">
 @if (Flyer == null)
 {
 	<div class="text-center mt-4">
@@ -12,46 +12,14 @@
 }
 else
 {
-		
-	<Button class="arrow-btn left-arrow" @onclick="PrevPage" Disabled="@(_currentIndex == 0)">
-		<i class="bi bi-chevron-left"></i>
-	</Button>
-
-		<div class="d-flex">
-			<div class="image-container position-relative">
-				<picture>
-					<source type="image/webp" />
-			<img src="@Flyer[_currentIndex].ImageURL" alt="Flyer Page" class="flyer-image @(isBig ? "big" : "")" loading="lazy" decoding="async" fetchpriority="high"/>
-				</picture>
-			</div>
-			@if(_currentIndex + 1 < Flyer.Count)
-			{
-				<div class="image-container position-relative">
-					<picture>
-						<source
-							tpye="image/webp"/>
-						<img src="@Flyer[_currentIndex + 1].ImageURL" alt="Flyer Page" class="flyer-image @(isBig ? "big" : "")" loading="lazy" decoding="async" fetchpriority="high" />
-					</picture>
-				</div>
-			}
-
-			<Button class="position-absolute zoom-btn border border-dark" @onclick="ToggleSize">
-				@if (isBig)
-				{
-					<i class="bi bi-arrows-angle-contract"></i>
-				}
-				else
-				{
-					<i class="bi bi-arrows-angle-expand"></i>
-				}
-			</Button>
-			
-		</div>	
-
-	<Button Class="arrow-btn right-arrow" @onclick="NextPage" Disabled="@(_currentIndex == Flyer.Count - 1)">
-		<i class="bi bi-chevron-right"></i>
-	</Button>
-
+	<div class="pages-container" id="page">
+	@foreach(FlyerModel image in Flyer)
+	{
+		<div class="page">
+			<img class="img-fluid" src="@image.ImageURL" alt= "Page @image.PageIndex" loading="lazy"/>
+		</div>
+	}	
+		</div>
 }
 </div>
 
@@ -78,46 +46,4 @@ else
 
 		}
 	}
-	private void PrevPage()
-	{
-		if(_currentIndex == 1 && Flyer.Count % 2 == 1)
-		{
-			_currentIndex -= 1;
-		}
-		if(_currentIndex - 2  >= 0)
-		{
-			_currentIndex -= 2;
-		}
-	}
-
-	private void NextPage()
-	{
-		if(_currentIndex == 0 && Flyer.Count % 2 == 1)
-		{
-			_currentIndex += 1;
-		}
-		if(_currentIndex + 2 < Flyer.Count)
-		{
-			_currentIndex += 2;
-		}
-	}
-
-	private void HandleArrowKeyDown(KeyboardEventArgs e)
-	{
-		switch (e.Key)
-		{
-			case "ArrowLeft":
-				PrevPage();
-				break;
-			case "ArrowRight":
-				NextPage();
-				break;
-		}
-	}
-
-	private void ToggleSize()
-	{
-		isBig = !isBig;
-	}
-
 }
