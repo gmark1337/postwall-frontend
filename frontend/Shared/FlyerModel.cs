@@ -13,6 +13,9 @@ namespace frontend.Shared
         [JsonPropertyName("pageIndex")]
         public int PageIndex { get; set; }
 
+        [JsonPropertyName("ServiceType")]
+        public string ServiceType { get; set; }
+
         [JsonPropertyName("url")]
         public string ImageURL { get; set; } = string.Empty;
 
