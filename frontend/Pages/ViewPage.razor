@@ -2,7 +2,7 @@
 @using frontend.Shared
 @inject HttpClient _httpClient
 
-<div class="magazine-viewer justify-content-center align-items-center position-relative" tabindex="0">
+<div class="magazine-viewer" tabindex="0">
 @if (Flyer == null)
 {
 	<div class="text-center mt-4">
@@ -15,8 +15,8 @@ else
 	<div class="pages-container" id="page">
 	@foreach(FlyerModel image in Flyer)
 	{
-		<div class="page">
-			<img class="img-fluid" src="@image.ImageURL" alt= "Page @image.PageIndex" loading="lazy"/>
+		<div class="page gap-3">
+			<img src="@image.ImageURL" alt= "Page @image.PageIndex" loading="lazy"/>
 		</div>
 	}	
 		</div>
